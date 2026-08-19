@@ -1,0 +1,14 @@
+# Smithery deployment config.
+# Used when publishing this MCP server on smithery.ai.
+# See: https://smithery.ai/docs/build
+
+startCommand:
+  type: stdio
+  configSchema: {}
+  # No configuration/API keys required — this server needs no secrets.
+  commandFunction:
+    |
+    (config) => ({
+      command: "uv",
+      args: ["run", "server.py"]
+    })
