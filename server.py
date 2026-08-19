@@ -51,4 +51,4 @@ def define(word: str) -> str:
 #    testing / Claude Desktop). For remote deployment we switch this to
 #    "streamable-http" — see README.md.
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(transport="streamable-http")
