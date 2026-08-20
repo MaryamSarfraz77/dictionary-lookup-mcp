@@ -9,6 +9,7 @@ This file is intentionally short. The goal of this project is to learn
 how MCP works, not to build something complex.
 """
 
+import os
 from mcp.server.fastmcp import FastMCP
 import httpx
 
@@ -46,15 +47,14 @@ def define(word: str) -> str:
 
 
 # 3. Run the server.
-#    mcp.run() starts the server and makes it listen for requests from
-#    an MCP client over the "stdio" transport by default (used for local
-#    testing / Claude Desktop). For remote deployment we switch this to
-#    "streamable-http" — see README.md.
+#    Locally (Claude Desktop / MCP Inspector) this uses "stdio" transport.
+#    When deployed remotely (Railway/Render), we switch to "streamable-http"
+#    and bind to the host/port the platform assigns via the PORT env var.
 if __name__ == "__main__":
-    import os
-
-    mcp.run(
-        transport="streamable-http",
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 8000)),
-    )
+    if os.environ.get("PORT"):
+        # Running on a hosting platform (Railway sets PORT automatically)
+        port = int(os.environ["PORT"])
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=port)
+    else:
+        # Running locally
+        mcp.run()
