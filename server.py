@@ -15,7 +15,18 @@ import httpx
 
 # 1. Create the server and give it a name.
 #    This name is what shows up in your MCP client (e.g. Claude Desktop).
-mcp = FastMCP("Dictionary Lookup")
+#    IMPORTANT: host/port must be set here, at construction time — passing
+#    them to mcp.run() later is silently ignored by the SDK.
+_PORT = os.environ.get("PORT")
+if _PORT:
+    # Running on a hosting platform (Railway/Render set PORT automatically).
+    # host="0.0.0.0" is required so the platform's proxy can reach the
+    # container from outside — "127.0.0.1" (the default) is not reachable
+    # externally, which is what caused the earlier 502 errors.
+    mcp = FastMCP("Dictionary Lookup", host="0.0.0.0", port=int(_PORT))
+else:
+    # Running locally — defaults are fine.
+    mcp = FastMCP("Dictionary Lookup")
 
 
 # 2. Define a tool.
@@ -48,13 +59,10 @@ def define(word: str) -> str:
 
 # 3. Run the server.
 #    Locally (Claude Desktop / MCP Inspector) this uses "stdio" transport.
-#    When deployed remotely (Railway/Render), we switch to "streamable-http"
-#    and bind to the host/port the platform assigns via the PORT env var.
+#    When deployed remotely (Railway/Render), we switch to "streamable-http" —
+#    host/port were already configured above at construction time.
 if __name__ == "__main__":
-    if os.environ.get("PORT"):
-        # Running on a hosting platform (Railway sets PORT automatically)
-        port = int(os.environ["PORT"])
-        mcp.run(transport="streamable-http", host="0.0.0.0", port=port)
+    if _PORT:
+        mcp.run(transport="streamable-http")
     else:
-        # Running locally
         mcp.run()
